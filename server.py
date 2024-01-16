@@ -7,7 +7,6 @@ CORS(app)  # Enable CORS for all routes
 
 app.config['UPLOAD_FOLDER'] = './uploads'
 allowed_extensions = set(['png', 'jpg', 'jpeg', 'gif'])
-fixed_filename = 'uploaded_image'
 
 
 # Function to check allowed file types
@@ -46,9 +45,7 @@ def upload_file():
         return jsonify({"error": "No selected file"}), 400
 
     if file and allowed_file(file.filename):
-        # Save the file with the constant name 'uploaded_image.jpg'
-        extension = file.filename.rsplit('.', 1)[1].lower()
-        saved_filename = f"{fixed_filename}.{extension}"
+        saved_filename = "uploaded_image.png"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], saved_filename))
         return jsonify({"message": "File uploaded successfully", "filename": saved_filename}), 200
     else:
