@@ -1,6 +1,5 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
-from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
@@ -40,22 +39,21 @@ def flutter_return():
 @app.route('/flutter/upload', methods=["POST"])
 def upload_file():
     if 'image' not in request.files:
-        # Return an error if no 'image' part is found in the request
         return jsonify({"error": "No image part"}), 400
     file = request.files['image']
 
     if file.filename == '':
-        # Return an error if no file is selected
         return jsonify({"error": "No selected file"}), 400
 
     if file and allowed_file(file.filename):
-        # Save the uploaded file with a secure filename to the specified UPLOAD_FOLDER
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return jsonify({"message": "File uploaded successfully"}), 200
+        # Save the file with the constant name 'uploaded_image.jpg'
+        extension = file.filename.rsplit('.', 1)[1].lower()
+        saved_filename = f"{fixed_filename}.{extension}"
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], saved_filename))
+        return jsonify({"message": "File uploaded successfully", "filename": saved_filename}), 200
     else:
-        # Return an error if the file type is not permitted
         return jsonify({"error": "File type not permitted"}), 400
+
 
 if __name__ == '__main__':
     # Run the application on host '0.0.0.0' and port 81
