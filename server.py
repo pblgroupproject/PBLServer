@@ -24,7 +24,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 @app.route('/')
 def server():
     # Render the index.html template
-    return render_template('index.html')
+    return render_template('index.html', filename='uploaded_image.png')
 
 
 @app.route('/flutter', methods=['GET'])
@@ -54,6 +54,9 @@ def upload_file():
     else:
         return jsonify({"error": "File type not permitted"}), 400
 
+@app.route('/image/<filename>')
+def serve_image(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     # Run the application on host '0.0.0.0' and port 81
