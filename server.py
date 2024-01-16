@@ -20,13 +20,16 @@ def flutterReturn():
     return jsonify(json)
 
 @app.route('/flutter/upload', methods = ["POST"])
-def upload():
-        if(request.method == "POST"):
-            imagefile = request.files['image']
-            filename = werkzeug.utils.secure_filename(imagefile.filename)
-            imagefile.save("./uploadedimages/"+filename)
-            return jsonify({
-                "message" : "Image Uploaded Successfully"})
+def upload_file():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image part"}), 400
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return jsonify({"message": "File uploaded successfully"}), 200
 
     
 if __name__ == '__main__':
