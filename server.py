@@ -23,7 +23,7 @@ def flutterReturn():
 def upload():
         if(request.method == "POST"):
             imagefile = request.files['image']
-            filename = werkzeug.utils.secure_filenae(imagefile.filename)
+            filename = werkzeug.utils.secure_filename(imagefile.filename)
             imagefile.save("./uploadedimages/"+filename)
             return jsonify({
                 "message" : "Image Uploaded Successfully"})
