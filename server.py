@@ -57,18 +57,6 @@ def upload_file():
         # Return an error if the file type is not permitted
         return jsonify({"error": "File type not permitted"}), 400
 
-
-@app.route('/received_image')
-def received_image():
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], fixed_filename)
-    if os.path.exists(file_path):
-        # Serve the 'uploaded_image' file if it exists
-        return send_from_directory(directory=app.config['UPLOAD_FOLDER'], filename=fixed_filename, as_attachment=False)
-    else:
-        # Display a message if no image has been uploaded yet
-        return "<h1>No Image Uploaded Yet</h1>"
-
-
 if __name__ == '__main__':
     # Run the application on host '0.0.0.0' and port 81
     app.run(host='0.0.0.0', port=81)
