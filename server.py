@@ -6,6 +6,8 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 app.config['UPLOAD_FOLDER'] = './uploads'
+app.config['RESULT_FOLDER'] = './Results'
+
 allowed_extensions = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
@@ -51,9 +53,39 @@ def upload_file():
     else:
         return jsonify({"error": "File type not permitted"}), 400
 
+
+@app.route('/flutter/predict')
+def predict():
+
+    filename  = "uploaded_image.png"
+
+    rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")
+    project = rf.workspace().project("hairfalldetection")
+    model = project.version(1).model
+    
+    # infer on a local image
+    result_generated = model.predict(f"./uploads/{filename}").json()
+    for prediction in result_generated['predictions']:
+        print(prediction['class'])
+    
+    # infer on an image hosted elsewhere
+    # print(model.predict("URL_OF_YOUR_IMAGE").json())
+    
+    # save an image annotated with your predictions
+    model.predict(f"./uploads/filename").save(f"./Results/{filename}")
+
+
+
+
 @app.route('/image/<filename>')
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@app.route('/image_result/<filename>')
+def result_image(filename):
+    return send_from_directory(app.config['RESULT_FOLDER'], filename)
+
 
 if __name__ == '__main__':
     # Run the application on host '0.0.0.0' and port 81
