@@ -57,26 +57,33 @@ def upload_file():
         return jsonify({"error": "File type not permitted"}), 400
 
 
+ # rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")
+
 @app.route('/flutter/predict')
 def predict():
+    filename = "uploaded_image.png"  # or get the actual filename from the request
 
-    filename  = "uploaded_image.png"
+    # Ensure the file exists
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"File not found: {filename}"}), 404
 
-    rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")
-    project = rf.workspace().project("hairfalldetection")
-    model = project.version(1).model
-    
-    # infer on a local image
-    result_generated = model.predict(f"./uploads/{filename}").json()
-    for prediction in result_generated['predictions']:
-        print(prediction['class'])
-    
-    # infer on an image hosted elsewhere
-    # print(model.predict("URL_OF_YOUR_IMAGE").json())
-    
-    # save an image annotated with your predictions
-    model.predict(f"./uploads/filename").save(f"./Results/{filename}")
+    try:
+        rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")  # Use your actual API key
+        project = rf.workspace().project("hairfalldetection")
+        model = project.version(1).model
 
+        # infer on a local image
+        result_generated = model.predict(file_path).json()
+        for prediction in result_generated['predictions']:
+            print(prediction['class'])
+
+        # save an image annotated with your predictions
+        model.predict(file_path).save(os.path.join(app.config['RESULT_FOLDER'], filename))
+
+        return jsonify(result_generated), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -84,10 +91,6 @@ def predict():
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-
-@app.route('/image_result/<filename>')
-def result_image(filename):
-    return send_from_directory(app.config['RESULT_FOLDER'], filename)
 
 
 if __name__ == '__main__':
