@@ -79,7 +79,7 @@ def predict():
             print(prediction['class'])
 
         # save an image annotated with your predictions
-        model.predict(file_path).save(os.path.join(app.config['RESULT_FOLDER'], filename))
+        model.predict(file_path).save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         return jsonify(result_generated), 200
     except Exception as e:
@@ -87,13 +87,13 @@ def predict():
 
 
 
-# @app.route('/image/<filename>')
-# def serve_image(filename):
-#     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
 @app.route('/image/<filename>')
 def serve_image(filename):
-    return send_from_directory(app.config['RESULT_FOLDER'], filename)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# @app.route('/image/<filename>')
+# def serve_image(filename):
+#     return send_from_directory(app.config['RESULT_FOLDER'], filename)
 
 
 
