@@ -87,9 +87,15 @@ def predict():
 
 
 
+# @app.route('/image/<filename>')
+# def serve_image(filename):
+#     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 @app.route('/image/<filename>')
 def serve_image(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    return send_from_directory(app.config['RESULT_FOLDER'], filename)
+
+
 
 
 
