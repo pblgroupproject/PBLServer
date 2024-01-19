@@ -1,6 +1,8 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory
 
 from roboflow import Roboflow
+from ultralytics import YOLO
+
 
 from flask_cors import CORS
 import os
@@ -69,19 +71,32 @@ def predict():
         return jsonify({"error": f"File not found: {filename}"}), 404
 
     try:
-        rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")  # Use your actual API key
-        project = rf.workspace().project("hairfalldetection")
-        model = project.version(1).model
+        # rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")  # Use your actual API key
+        # project = rf.workspace().project("hairfalldetection")
+        # model = project.version(1).model
 
-        # infer on a local image
-        result_generated = model.predict(file_path).json()
-        for prediction in result_generated['predictions']:
-            print(prediction['class'])
+        model = YOLO('best.pt')
 
-        # save an image annotated with your predictions
-        model.predict(file_path).save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        results = model('advait_frontprofile.jpg')
 
-        return jsonify(result_generated), 200
+  # list of 1 Results object
+        return jsonify(results), 200
+
+
+
+        
+
+
+
+    #     # infer on a local image
+    #     result_generated = model.predict(file_path).json()
+    #     for prediction in result_generated['predictions']:
+    #         print(prediction['class'])
+
+    #     # save an image annotated with your predictions
+    #     model.predict(file_path).save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    #     return jsonify(result_generated), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
