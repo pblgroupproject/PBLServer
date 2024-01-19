@@ -74,22 +74,20 @@ def predict():
         model = YOLO('best.pt')
         results = model(file_path)
 
-        # Convert results to a JSON-serializable format
-        # This is a pseudo-code, adjust according to your model's output structure
-        json_results = []
-        for result in results.pred:
-            for *xyxy, conf, cls in result:
-                label = model.names[int(cls)]
-                json_results.append({
-                    "coordinates": [float(x) for x in xyxy],
-                    "confidence": float(conf),
-                    "class": label
-                })
+        # Process the results to convert them into a JSON-serializable format
+        processed_results = []
+        for detection in results.xyxy[0]:  # Assuming results.xyxy[0] contains detection data
+            # Example: Extracting bounding box coordinates, confidence and class
+            x1, y1, x2, y2, conf, cls_id = detection.tolist()
+            processed_results.append({
+                "bounding_box": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
+                "confidence": conf,
+                "class_id": int(cls_id)
+            })
 
-        return jsonify(json_results), 200
+        return jsonify(processed_results), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/image/<filename>')
 def serve_image(filename):
