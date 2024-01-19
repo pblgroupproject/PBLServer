@@ -77,7 +77,7 @@ def predict():
 
         model = YOLO('best.pt')
 
-        results = model('advait_frontprofile.jpg')
+        results = model(file_path)
 
   # list of 1 Results object
         return jsonify(results), 200
@@ -85,8 +85,6 @@ def predict():
 
 
         
-
-
 
     #     # infer on a local image
     #     result_generated = model.predict(file_path).json()
