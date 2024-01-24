@@ -1,11 +1,7 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory
-
-from roboflow import Roboflow
-from ultralytics import YOLO
-
-
 from flask_cors import CORS
 import os
+from ultralytics import YOLO
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -13,7 +9,7 @@ CORS(app)  # Enable CORS for all routes
 app.config['UPLOAD_FOLDER'] = './uploads'
 app.config['RESULT_FOLDER'] = './Results'
 
-allowed_extensions = set(['png', 'jpg', 'jpeg', 'gif'])
+allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 # Function to check allowed file types
@@ -36,10 +32,10 @@ def server():
 @app.route('/flutter', methods=['GET'])
 def flutter_return():
     # Get the 'query' parameter from the request and return it as JSON
-    json = {}
+    json_data = {}
     input_args = str(request.args['query'])
-    json["output"] = input_args
-    return jsonify(json)
+    json_data["output"] = input_args
+    return jsonify(json_data)
 
 
 @app.route('/flutter/upload', methods=["POST"])
@@ -59,8 +55,6 @@ def upload_file():
         return jsonify({"error": "File type not permitted"}), 400
 
 
- # rf = Roboflow(api_key="M95kxAi98WPQph7csqI5")
-
 @app.route('/flutter/predict')
 def predict():
     filename = "uploaded_image.png"  # or get the actual filename from the request
@@ -76,8 +70,7 @@ def predict():
 
         # Process the results to convert them into a JSON-serializable format
         processed_results = []
-        for detection in results.xyxy[0]:  # Assuming results.xyxy[0] contains detection data
-            # Example: Extracting bounding box coordinates, confidence and class
+        for detection in results.pred[0]:
             x1, y1, x2, y2, conf, cls_id = detection.tolist()
             processed_results.append({
                 "bounding_box": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
@@ -86,19 +79,14 @@ def predict():
             })
 
         return jsonify(processed_results), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/image/<filename>')
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-# @app.route('/image/<filename>')
-# def serve_image(filename):
-#     return send_from_directory(app.config['RESULT_FOLDER'], filename)
-
-
-
 
 
 if __name__ == '__main__':
