@@ -26,6 +26,8 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 @app.route('/')
 def server():
     # Render the index.html template
+    print("Hello")
+
     return render_template('index.html', filename='uploaded_image.png')
 
 
@@ -67,6 +69,9 @@ def predict():
     try:
         model = YOLO('best.pt')
         results = model(file_path)
+
+            
+        print(results)
 
         # Process the results to convert them into a JSON-serializable format
         processed_results = []
