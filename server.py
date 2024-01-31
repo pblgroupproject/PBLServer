@@ -69,21 +69,24 @@ def predict():
     try:
         model = YOLO('best.pt')
         results = model(file_path)
+        result = results[0]
+        box = result.boxes[0]
+        class_id = int(box.cls[0].item())
+        
+        stage = "normal"
+        if class_id == 0:
+            stage = "bald"
+        elif class_id == 1:
+            stage = "normal"
+        elif class_id == 2:
+            stage = "stage 1"
+        elif class_id == 3:
+            stage = "stage 2"
+        elif class_id == 4:
+            stage = "stage 3"
+        
 
-            
-        print(results)
-
-        # Process the results to convert them into a JSON-serializable format
-        processed_results = []
-        for detection in results.pred[0]:
-            x1, y1, x2, y2, conf, cls_id = detection.tolist()
-            processed_results.append({
-                "bounding_box": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
-                "confidence": conf,
-                "class_id": int(cls_id)
-            })
-
-        return jsonify(processed_results), 200
+        return jsonify({"stage":f"{stage}"}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
