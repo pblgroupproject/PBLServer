@@ -84,9 +84,14 @@ def predict():
             stage = "stage 2"
         elif class_id == 4:
             stage = "stage 3"
-        
 
-        return jsonify({"stage":f"{stage}"}), 200
+        im_array = result.plot()
+        result_image = Image.fromarray(im_array[..., ::-1])
+        image_buffer = BytesIO()
+        result_image.save(image_buffer, format="PNG")
+        image_data = base64.b64encode(image_buffer.getvalue()).decode("utf-8")        
+
+        return jsonify({"stage":f"{stage}"}, "file": image_data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
