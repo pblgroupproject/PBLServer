@@ -2,6 +2,9 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
 import os
 from ultralytics import YOLO
+from PIL import Image
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
