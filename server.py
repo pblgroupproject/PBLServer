@@ -29,9 +29,6 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 @app.route('/')
 def server():
-    # Render the index.html template
-    print("Hello")
-
     return render_template('index.html', filename='uploaded_image.png')
 
 
