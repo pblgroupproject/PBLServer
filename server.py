@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
+import sqlite3
 import os
 from ultralytics import YOLO
 from PIL import Image
@@ -103,6 +104,25 @@ def predict():
 @app.route('/image/<filename>')
 def serve_image(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/product/api/<int:product_id>')
+def get_product(product_id):
+    if not os.path.exists('data/database.db'):
+        return jsonify({'error': 'Database not found'}), 500  
+
+    conn = sqlite3.connect('data/database.db')
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM products WHERE ID = ?', (product_id,))
+    product = cursor.fetchone()
+
+    conn.close()
+
+    if product:
+        keys = ['ID', 'NAME', 'PRICE', 'IMAGE', 'DESCRIPTION', 'BRAND', 'BENEFITS', 'URL', 'CATEGORY', 'BEST_SELLER']
+        return jsonify(dict(zip(keys, product)))
+    else:
+        return jsonify({'error': 'Product not found'}), 404
 
 
 if __name__ == '__main__':
