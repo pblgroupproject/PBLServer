@@ -124,6 +124,23 @@ def get_product(product_id):
     else:
         return jsonify({'error': 'Product not found'}), 404
 
+@app.route('/product/api/')
+def get_all_products():
+    if not os.path.exists('data/database.db'):
+        return jsonify({'error': 'Database not found'}), 500  
+
+    conn = sqlite3.connect('data/database.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM products')
+    products = cursor.fetchall()
+    conn.close()
+    if products:
+        keys = ['ID', 'NAME', 'PRICE', 'IMAGE', 'DESCRIPTION', 'BRAND', 'BENEFITS', 'URL', 'CATEGORY', 'BEST_SELLER']
+        return jsonify([dict(zip(keys, product)) for product in products])
+    else:
+        return jsonify([])
+
+
 
 if __name__ == '__main__':
     # Run the application on host '0.0.0.0' and port 81
