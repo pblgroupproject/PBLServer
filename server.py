@@ -32,13 +32,9 @@ def server():
     return render_template('index.html', filename='uploaded_image.png')
 
 
-@app.route('/flutter', methods=['GET'])
-def flutter_return():
-    # Get the 'query' parameter from the request and return it as JSON
-    json_data = {}
-    input_args = str(request.args['query'])
-    json_data["output"] = input_args
-    return jsonify(json_data)
+@app.route('/keep-alive')
+def keep_alive():
+    return 'Server is alive'
 
 
 @app.route('/flutter/upload', methods=["POST"])
