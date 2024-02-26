@@ -177,58 +177,7 @@ def chatbot():
     else:
         return jsonify({'error' : 'Only POST requests are allowed'})
 
-@app.route('/product/api/', methods=['GET','POST'])
-def get_all_products():
-    if not os.path.exists('data/database.db'):
-        return jsonify({'error': 'Database not found'}), 500  
-    if request.method == 'GET':
-        conn = sqlite3.connect('data/database.db')
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM products')
-        products = cursor.fetchall()
-        conn.close()
-        if products:
-            keys = ['ID', 'NAME', 'PRICE', 'IMAGE', 'DESCRIPTION', 'BRAND', 'BENEFITS', 'URL', 'CATEGORY', 'BEST_SELLER']
-            return jsonify([dict(zip(keys, product)) for product in products])
-        else:
-            return jsonify([])
-            
-    elif request.method == 'POST':
-        data = request.json
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-
-        # Check if all required fields are present
-        required_fields = ['NAME', 'PRICE', 'IMAGE', 'DESCRIPTION', 'BRAND', 'BENEFITS', 'URL', 'CATEGORY', 'BEST_SELLER']
-        if not all(field in data for field in required_fields):
-            return jsonify({'error': 'Missing required fields'}), 400
-
-        # Extract data from request and insert into the database
-        name = data.get('NAME')
-        price = data.get('PRICE')
-        image = data.get('IMAGE')
-        description = data.get('DESCRIPTION')
-        brand = data.get('BRAND')
-        benefits = data.get('BENEFITS')
-        url = data.get('URL')
-        category = data.get('CATEGORY')
-        best_seller = data.get('BEST_SELLER')
-
-        # Insert the data into the database (this part is just a placeholder, you need to modify it based on your database setup)
-        conn = sqlite3.connect('data/database.db')
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO products (NAME, PRICE, IMAGE, DESCRIPTION, BRAND, BENEFITS, URL, CATEGORY, BEST_SELLER) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                       (name, price, image, description, brand, benefits, url, category, best_seller))
-        conn.commit()
-        conn.close()
-
-        return jsonify({'message': 'Product added successfully'}), 201
-    else:
-        return jsonify({'error': 'Method not allowed'}), 405
-
-
-
-    def botResponse(prompt):
+def botResponse(prompt):
     url = "https://api.worqhat.com/api/ai/content/v2"
     payload = {
         "conversation_history": [{
@@ -365,6 +314,60 @@ def get_all_products():
     response = requests.request("POST", url, json=payload, headers=headers)
     loc = response.text.find("content")
     return response.text[loc+10:-2]
+
+
+@app.route('/product/api/', methods=['GET','POST'])
+def get_all_products():
+    if not os.path.exists('data/database.db'):
+        return jsonify({'error': 'Database not found'}), 500  
+    if request.method == 'GET':
+        conn = sqlite3.connect('data/database.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM products')
+        products = cursor.fetchall()
+        conn.close()
+        if products:
+            keys = ['ID', 'NAME', 'PRICE', 'IMAGE', 'DESCRIPTION', 'BRAND', 'BENEFITS', 'URL', 'CATEGORY', 'BEST_SELLER']
+            return jsonify([dict(zip(keys, product)) for product in products])
+        else:
+            return jsonify([])
+            
+    elif request.method == 'POST':
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        # Check if all required fields are present
+        required_fields = ['NAME', 'PRICE', 'IMAGE', 'DESCRIPTION', 'BRAND', 'BENEFITS', 'URL', 'CATEGORY', 'BEST_SELLER']
+        if not all(field in data for field in required_fields):
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Extract data from request and insert into the database
+        name = data.get('NAME')
+        price = data.get('PRICE')
+        image = data.get('IMAGE')
+        description = data.get('DESCRIPTION')
+        brand = data.get('BRAND')
+        benefits = data.get('BENEFITS')
+        url = data.get('URL')
+        category = data.get('CATEGORY')
+        best_seller = data.get('BEST_SELLER')
+
+        # Insert the data into the database (this part is just a placeholder, you need to modify it based on your database setup)
+        conn = sqlite3.connect('data/database.db')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO products (NAME, PRICE, IMAGE, DESCRIPTION, BRAND, BENEFITS, URL, CATEGORY, BEST_SELLER) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                       (name, price, image, description, brand, benefits, url, category, best_seller))
+        conn.commit()
+        conn.close()
+
+        return jsonify({'message': 'Product added successfully'}), 201
+    else:
+        return jsonify({'error': 'Method not allowed'}), 405
+
+
+
+    
 
         
 
