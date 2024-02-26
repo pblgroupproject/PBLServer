@@ -6,6 +6,8 @@ from ultralytics import YOLO
 from PIL import Image
 import base64
 from io import BytesIO
+import json
+
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
