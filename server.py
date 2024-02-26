@@ -14,7 +14,7 @@ app.config['UPLOAD_FOLDER'] = './uploads'
 app.config['RESULT_FOLDER'] = './Results'
 
 allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
-
+chat_history = []
 
 # Function to check allowed file types
 def allowed_file(filename):
@@ -25,6 +25,18 @@ def allowed_file(filename):
 # Create the uploads directory if it doesn't exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
+
+
+def botResponse(prompt):
+    url = "https://api.worqhat.com/api/ai/content/v2"
+    with open("chat_bot_dataset.json", "r") as json_file:
+        data = json.load(json_file)
+        payload = data["payload"]
+        headers = data["headers"]
+
+    response = requests.request("POST", url, json=payload, headers=headers)
+    loc = response.text.find("content")
+    return response.text[loc+10:-2]
 
 
 @app.route('/')
@@ -160,6 +172,17 @@ def get_product(product_id):
         return jsonify({'message': 'Product updated successfully'}), 200
     else:
         return jsonify({'error': 'Method not allowed'}), 405
+
+@app.route('/flutter/chatbot/prompt', methods = ['POST'])
+def chatbot():
+    if request.method == 'POST':
+        prompt = request.json['prompt']
+
+        response = botResponse(prompt)
+
+        return jsonify({'response': response})
+    else:
+        return jsonify({'error' : 'Only POST requests are allowed'})
 
 @app.route('/product/api/', methods=['GET','POST'])
 def get_all_products():
