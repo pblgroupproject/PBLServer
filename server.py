@@ -8,6 +8,7 @@ import base64
 from io import BytesIO
 import json
 import requests
+from datetime import datetime
 
 
 
@@ -58,9 +59,28 @@ def upload_file():
     else:
         return jsonify({"error": "File type not permitted"}), 400
 
+def add_user_image(user_id, image_data):
+    try:
+        conn = sqlite3.connect('data/user_images.db')
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO user_images (user_id, image_data, upload_time)
+            VALUES (?, ?, ?)
+        """, (user_id, image_data, datetime.now()))
+
+        conn.commit()
+
+        conn.close()
+
+        return True, None 
+
+    except Exception as e:
+        return False, str(e)
 
 @app.route('/flutter/predict')
 def predict():
+    user_id = request.args.get('user_id', default=None)
     filename = "uploaded_image.png"  # or get the actual filename from the request
 
     # Ensure the file exists
@@ -92,11 +112,37 @@ def predict():
         image_buffer = BytesIO()
         result_image.save(image_buffer, format="PNG")
         image_data = base64.b64encode(image_buffer.getvalue()).decode("utf-8")        
+        
+        if user_id:
+            add_user_image(user_id, image_data)
 
         return jsonify({"stage": f"{stage}", "file": image_data}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+from flask import jsonify
+
+@app.route('/api/images/<string:user_id>', methods=['GET'])
+def get_user_images(user_id):
+    try:
+        conn = sqlite3.connect('data/user_images.db')
+        cursor = conn.cursor()
+
+        # Fetch all image data for the given user_id
+        cursor.execute("SELECT image_data FROM user_images WHERE user_id = ? ORDER BY upload_time DESC", (user_id,))
+        images = cursor.fetchall()
+
+        conn.close()
+
+        # Extract image_data from the result and return as a list
+        image_data_list = [image[0] for image in images]
+
+        return jsonify({"images": image_data_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/image/<filename>')
