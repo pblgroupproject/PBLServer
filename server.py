@@ -59,15 +59,15 @@ def upload_file():
     else:
         return jsonify({"error": "File type not permitted"}), 400
 
-def add_user_image(user_id, image_data):
+def add_user_image(user_id, image_data, stage):
     try:
         conn = sqlite3.connect('data/user_images.db')
         cursor = conn.cursor()
 
         cursor.execute("""
-            INSERT INTO user_images (user_id, image_data, upload_time)
-            VALUES (?, ?, ?)
-        """, (user_id, image_data, datetime.now()))
+            INSERT INTO user_images (user_id, image_data, upload_time, stage)
+            VALUES (?, ?, ?, ?)
+        """, (user_id, image_data, datetime.now(), stage))
 
         conn.commit()
 
@@ -114,7 +114,7 @@ def predict():
         image_data = base64.b64encode(image_buffer.getvalue()).decode("utf-8")        
         
         if user_id:
-            add_user_image(user_id, image_data)
+            add_user_image(user_id, image_data, stage)
 
         return jsonify({"stage": f"{stage}", "file": image_data}), 200
 
@@ -129,20 +129,17 @@ def get_user_images(user_id):
         conn = sqlite3.connect('data/user_images.db')
         cursor = conn.cursor()
 
-        # Fetch all image data for the given user_id
-        cursor.execute("SELECT image_data FROM user_images WHERE user_id = ? ORDER BY upload_time DESC", (user_id,))
+        cursor.execute("SELECT image_data, upload_time, stage FROM user_images WHERE user_id = ? ORDER BY upload_time DESC", (user_id,))
         images = cursor.fetchall()
 
         conn.close()
 
-        # Extract image_data from the result and return as a list
-        image_data_list = [image[0] for image in images]
+        image_list = [{"image_data": image[0], "upload_time": image[1], "stage": image[2]} for image in images]
 
-        return jsonify({"images": image_data_list}), 200
+        return jsonify({"images": image_list}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 
 @app.route('/image/<filename>')
