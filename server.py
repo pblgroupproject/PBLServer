@@ -45,6 +45,11 @@ def keep_alive():
 
 @app.route('/flutter/upload', methods=["POST"])
 def upload_file():
+    user_id = request.args.get('user_id', default=None)
+
+    if not user_id:
+        return jsonify({'error': 'User id not provided'})
+        
     if 'image' not in request.files:
         return jsonify({"error": "No image part"}), 400
     file = request.files['image']
@@ -53,7 +58,7 @@ def upload_file():
         return jsonify({"error": "No selected file"}), 400
 
     if file and allowed_file(file.filename):
-        saved_filename = "uploaded_image.png"
+        saved_filename = f"{user_id}.png"
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], saved_filename))
         return jsonify({"message": "File uploaded successfully", "filename": saved_filename}), 200
     else:
@@ -81,7 +86,12 @@ def add_user_image(user_id, image_data, stage):
 @app.route('/flutter/predict')
 def predict():
     user_id = request.args.get('user_id', default=None)
-    filename = "uploaded_image.png"  # or get the actual filename from the request
+
+    if not user_id:
+        return jsonify({'error':'user id not provided'})
+
+
+    filename = f"{user_id}.png"
 
     # Ensure the file exists
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -113,8 +123,7 @@ def predict():
         result_image.save(image_buffer, format="PNG")
         image_data = base64.b64encode(image_buffer.getvalue()).decode("utf-8")        
         
-        if user_id:
-            add_user_image(user_id, image_data, stage)
+        add_user_image(user_id, image_data, stage)
 
         return jsonify({"stage": f"{stage}", "file": image_data}), 200
 
